@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Reading Room - Library Management System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-modal {
+            background: #ffffff;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(126, 34, 206, 0.25);
+        }
+        .white-card {
+            background: #ffffff;
+            border: 1px solid rgba(168, 85, 247, 0.18);
+            box-shadow: 0 4px 15px -3px rgba(147, 51, 234, 0.05);
+        }
+        .white-card:hover {
+            border-color: rgba(147, 51, 234, 0.4);
+            box-shadow: 0 15px 25px -5px rgba(147, 51, 234, 0.12);
+        }
+    </style>
+</head>
+<body class="bg-purple-50/40 text-slate-800 flex h-screen overflow-hidden">
+
+    <!-- 1. Left Sidebar Navigation (White & Purple Theme) -->
+    <aside class="w-64 bg-white border-r border-purple-100 flex flex-col p-5 space-y-5 select-none shrink-0 shadow-sm">
+        
+        <!-- Logo Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-purple-100">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-purple-600 to-indigo-600 p-2.5 rounded-xl text-white shadow-md shadow-purple-600/30 text-xl font-bold">
+                    📚
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-wide text-purple-950 leading-tight">Library Mgmt</h1>
+                    <span class="text-[11px] text-purple-600 font-semibold tracking-wider uppercase">Online Reader</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Role Status Pill -->
+        <div class="flex items-center justify-between p-2.5 rounded-xl {{ 'bg-purple-50 border border-purple-200 text-purple-800' if user_role == 'Student' else 'bg-indigo-50 border border-indigo-200 text-indigo-800' }} text-xs">
+            <div class="flex items-center space-x-2">
+                <span>{{ '🎓' if user_role == 'Student' else '🛡️' }}</span>
+                <span class="font-semibold">{{ user_role }} Portal</span>
+            </div>
+            <a href="/logout" class="text-[11px] text-rose-500 hover:text-rose-700 hover:underline font-bold transition flex items-center space-x-1" title="Log Out">
+                <span>🚪 Logout</span>
+            </a>
+        </div>
+
+        <!-- Navigation Categories -->
+        <nav class="flex-1 space-y-1.5 overflow-y-auto">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-purple-400 px-3 py-1">Main Menu</div>
+            <a href="/" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition duration-150">
+                <span>📋</span> <span>All Books Inventory</span>
+            </a>
+
+            <!-- Categories Section -->
+            <div class="text-[11px] font-bold uppercase tracking-wider text-purple-400 px-3 pt-4 pb-1">Categories</div>
+            
+            <!-- 1. Entrepreneurs -->
+            <a href="/read-books?genre=Entrepreneurs" class="flex items-center justify-between px-3.5 py-2 rounded-xl transition duration-150 {{ 'text-purple-700 font-semibold bg-purple-50 border border-purple-200' if current_genre == 'Entrepreneurs' else 'text-slate-600 hover:bg-purple-50 hover:text-purple-700' }}">
+                <div class="flex items-center space-x-3">
+                    <span>💼</span> <span>Entrepreneurs</span>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md {{ 'bg-purple-600 text-white' if current_genre == 'Entrepreneurs' else 'bg-purple-100 text-purple-700' }}">
+                    {{ reading_genre_counts.get('Entrepreneurs', 0) }}
+                </span>
+            </a>
+
+            <!-- 2. Technology & AI -->
+            <a href="/read-books?genre=Technology%20%26%20AI" class="flex items-center justify-between px-3.5 py-2 rounded-xl transition duration-150 {{ 'text-purple-700 font-semibold bg-purple-50 border border-purple-200' if current_genre == 'Technology & AI' else 'text-slate-600 hover:bg-purple-50 hover:text-purple-700' }}">
+                <div class="flex items-center space-x-3">
+                    <span>🤖</span> <span>Technology & AI</span>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md {{ 'bg-purple-600 text-white' if current_genre == 'Technology & AI' else 'bg-purple-100 text-purple-700' }}">
+                    {{ reading_genre_counts.get('Technology & AI', 0) }}
+                </span>
+            </a>
+
+            <!-- 3. Psychology & Mindset -->
+            <a href="/read-books?genre=Psychology%20%26%20Mindset" class="flex items-center justify-between px-3.5 py-2 rounded-xl transition duration-150 {{ 'text-purple-700 font-semibold bg-purple-50 border border-purple-200' if current_genre == 'Psychology & Mindset' else 'text-slate-600 hover:bg-purple-50 hover:text-purple-700' }}">
+                <div class="flex items-center space-x-3">
+                    <span>🧠</span> <span>Psychology & Mindset</span>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md {{ 'bg-purple-600 text-white' if current_genre == 'Psychology & Mindset' else 'bg-purple-100 text-purple-700' }}">
+                    {{ reading_genre_counts.get('Psychology & Mindset', 0) }}
+                </span>
+            </a>
+
+            <!-- 4. Philosophical -->
+            <a href="/read-books?genre=Philosophical" class="flex items-center justify-between px-3.5 py-2 rounded-xl transition duration-150 {{ 'text-purple-700 font-semibold bg-purple-50 border border-purple-200' if current_genre == 'Philosophical' else 'text-slate-600 hover:bg-purple-50 hover:text-purple-700' }}">
+                <div class="flex items-center space-x-3">
+                    <span>🏛️</span> <span>Philosophical</span>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md {{ 'bg-purple-600 text-white' if current_genre == 'Philosophical' else 'bg-purple-100 text-purple-700' }}">
+                    {{ reading_genre_counts.get('Philosophical', 0) }}
+                </span>
+            </a>
+
+            <!-- 5. Comics -->
+            <a href="/read-books?genre=Comics" class="flex items-center justify-between px-3.5 py-2 rounded-xl transition duration-150 {{ 'text-purple-700 font-semibold bg-purple-50 border border-purple-200' if current_genre == 'Comics' else 'text-slate-600 hover:bg-purple-50 hover:text-purple-700' }}">
+                <div class="flex items-center space-x-3">
+                    <span>⚡</span> <span>Comics</span>
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-md {{ 'bg-purple-600 text-white' if current_genre == 'Comics' else 'bg-purple-100 text-purple-700' }}">
+                    {{ reading_genre_counts.get('Comics', 0) }}
+                </span>
+            </a>
+
+            <!-- 6. Read Books Online -->
+            <div class="text-[11px] font-bold uppercase tracking-wider text-purple-400 px-3 pt-4 pb-1">Digital Reader</div>
+            <a href="/read-books" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-purple-600 text-white font-semibold shadow-md shadow-purple-600/25 transition duration-150">
+                <div class="flex items-center space-x-3">
+                    <span>📖</span> <span>Read Books Online</span>
+                </div>
+                <span class="text-[11px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-md">{{ total_reading }}</span>
+            </a>
+        </nav>
+
+        <!-- Database Status Pill in Sidebar -->
+        <div class="bg-purple-50/60 p-3 rounded-xl border border-purple-100 text-xs">
+            <div class="flex items-center space-x-2 text-purple-700 font-semibold mb-1">
+                <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
+                <span>Direct Digital Reading</span>
+            </div>
+            <p class="text-slate-500 text-[11px]">Free public domain readers</p>
+        </div>
+    </aside>
+
+    <!-- 2. Main Content Area (White & Purple Theme) -->
+    <main class="flex-1 flex flex-col h-full bg-purple-50/30 overflow-hidden">
+
+        <!-- Action Header Bar -->
+        <header class="h-20 bg-white/95 border-b border-purple-100 flex items-center justify-between px-8 shrink-0 backdrop-blur-sm shadow-sm">
+            <div>
+                <h2 class="text-2xl font-extrabold text-purple-950 tracking-tight flex items-center space-x-3">
+                    <span>📖 Read Books Online</span>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-lg {{ 'bg-purple-100 text-purple-800 border border-purple-200' if current_genre == 'All' else 'bg-indigo-100 text-indigo-800 border border-indigo-200' }}">
+                        {{ 'Section: All Books' if current_genre == 'All' else 'Section: ' + current_genre }}
+                    </span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Showing <span class="font-bold text-purple-950">{{ reading_books|length }}</span> digital books with full reading links
+                </p>
+            </div>
+
+            <!-- Search Bar & Online Action -->
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search reading books by title or author..."
+                           class="w-72 pl-10 pr-4 py-2 rounded-xl bg-purple-50/50 border border-purple-200 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 transition">
+                </div>
+
+                {% if user_role == 'Admin' %}
+                <button onclick="openModal()" 
+                        class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-xl shadow-md shadow-purple-600/25 text-sm flex items-center space-x-2 transition transform active:scale-95">
+                    <span>+</span>
+                    <span>Add Book Link</span>
+                </button>
+                {% else %}
+                <span class="text-xs font-semibold px-3 py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center space-x-1.5 shadow-sm">
+                    <span>📖</span>
+                    <span>Digital Reader View</span>
+                </span>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Dynamic Reading Books Grid (White & Purple Cards) -->
+        <div class="flex-1 p-8 overflow-y-auto">
+            {% if reading_books|length == 0 %}
+            <div class="flex flex-col items-center justify-center h-64 text-center">
+                <div class="text-5xl mb-3">📖</div>
+                <h3 class="text-lg font-bold text-purple-950">No reading links in this category yet</h3>
+                {% if user_role == 'Admin' %}
+                <p class="text-sm text-slate-500 mt-1">Click "+ Add Book Link" above to add your own reading website URL.</p>
+                {% else %}
+                <p class="text-sm text-slate-500 mt-1">Please select another section from the menu to read books online.</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                {% for book in reading_books %}
+                <div class="reading-card white-card rounded-2xl p-5 flex flex-col justify-between transition duration-200"
+                     data-title="{{ book['title']|lower }}" data-author="{{ book['author']|lower }}" data-genre="{{ book['genre']|lower }}">
+                    
+                    <div>
+                        <!-- Cover Graphic Header -->
+                        <div class="w-full h-36 bg-gradient-to-br {{ book['cover_style'] }} rounded-xl flex flex-col items-center justify-center p-3 text-white shadow-md mb-4 relative overflow-hidden group">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full absolute top-2.5 right-2.5 bg-black/35 text-white backdrop-blur-sm border border-white/20">
+                                Free Online
+                            </span>
+                            <span class="text-4xl mb-1 filter drop-shadow">{{ book['icon'] }}</span>
+                            <p class="text-center font-bold text-sm leading-tight px-3 drop-shadow-md line-clamp-2">{{ book['title'] }}</p>
+                        </div>
+
+                        <!-- Genre and Title -->
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-[11px] font-semibold tracking-wider text-purple-700 uppercase bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                                {{ book['genre'] }}
+                            </span>
+                            <span class="text-xs text-slate-400">Online Edition</span>
+                        </div>
+
+                        <h3 class="font-bold text-base text-purple-950 leading-snug line-clamp-1" title="{{ book['title'] }}">
+                            {{ book['title'] }}
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5 mb-2.5">
+                            <span>Author:</span> <span class="font-medium text-slate-700">{{ book['author'] }}</span>
+                        </p>
+
+                        <!-- Book Description / Overview -->
+                        {% if book['description'] %}
+                        <p class="text-xs text-slate-600 bg-purple-50/50 p-2.5 rounded-lg border border-purple-100 line-clamp-2 mb-2 leading-relaxed">
+                            {{ book['description'] }}
+                        </p>
+                        {% endif %}
+
+                        <!-- Direct Web Link Display -->
+                        <div class="text-[11px] text-slate-500 truncate mb-1">
+                            <span class="text-slate-400">🔗 Link:</span>
+                            <span class="text-purple-600 font-mono">{{ book['read_url'] }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions Area (Open Browser Link + Admin Delete Link) -->
+                    <div class="mt-4 pt-3 border-t border-purple-100 flex items-center justify-between gap-2">
+                        <!-- Direct Link to open browser reading page (Accessible to both) -->
+                        <a href="{{ book['read_url'] }}" target="_blank" rel="noopener noreferrer" 
+                           class="flex-1 text-center text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white py-2.5 px-3 rounded-xl shadow-md shadow-purple-600/25 flex items-center justify-center space-x-1.5 transition transform active:scale-95">
+                            <span>🌐 Read Book</span>
+                            <span class="text-[11px]">↗</span>
+                        </a>
+
+                        {% if user_role == 'Admin' %}
+                        <!-- Delete Reading Link (Admin Only) -->
+                        <form action="/delete-reading-book/{{ book['id'] }}" method="POST" 
+                              onsubmit="return confirm('Remove \"{{ book['title'] }}\" from the reading list?');">
+                            <input type="hidden" name="current_genre" value="{{ current_genre }}">
+                            <button type="submit" 
+                                    class="text-xs font-semibold text-rose-500 hover:text-white border border-rose-200 hover:bg-rose-600 p-2.5 rounded-xl transition duration-150 shadow-sm"
+                                    title="Delete Book Link">
+                                🗑️
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="h-10 bg-white border-t border-purple-100 px-8 flex items-center justify-between text-[11px] text-purple-700/80 shrink-0">
+            <span>© Digital Reading Room • Free Public Domain & Open Educational Books</span>
+            <span>Logged in as: <strong class="text-purple-950 font-bold">{{ user_role }}</strong> • White & Purple Theme</span>
+        </footer>
+    </main>
+
+    <!-- 3. Modal Popup Overlay (DIRECT ACCESS FOR ADMIN ONLY) -->
+    {% if user_role == 'Admin' %}
+    <div id="addModal" class="fixed inset-0 bg-purple-950/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="glass-modal w-full max-w-md rounded-2xl p-6 shadow-2xl border border-purple-200 animate-in fade-in zoom-in duration-200">
+            <div class="flex items-center justify-between pb-4 border-b border-purple-100 mb-5">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl">➕</span>
+                    <h3 class="text-lg font-bold text-purple-950">Add Reading Book Link</h3>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-purple-950 text-lg font-bold p-1 rounded-lg hover:bg-purple-50 transition">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form action="/add-reading-book" method="POST" class="space-y-4">
+                <input type="hidden" name="current_genre" value="{{ current_genre }}">
+                
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Book Title</label>
+                    <input type="text" name="title" required placeholder="e.g., Deep Learning Book"
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Author Name</label>
+                    <input type="text" name="author" required placeholder="e.g., Ian Goodfellow"
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Category</label>
+                    <select name="genre" required
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 transition">
+                        <option value="Entrepreneurs">💼 Entrepreneurs</option>
+                        <option value="Technology & AI">🤖 Technology & AI</option>
+                        <option value="Psychology & Mindset">🧠 Psychology & Mindset</option>
+                        <option value="Philosophical">🏛️ Philosophical</option>
+                        <option value="Comics">⚡ Comics</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Reading Web Link (URL)</label>
+                    <input type="text" name="read_url" required placeholder="https://www.deeplearningbook.org"
+                           class="w-full px-3.5 py-2.5 rounded-xl bg-purple-50/40 border border-purple-200 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Short Description</label>
+                    <textarea name="description" rows="2" placeholder="Brief summary of the book content or reading material..."
+                              class="w-full px-3.5 py-2 rounded-xl bg-purple-50/40 border border-purple-200 text-slate-900 text-xs focus:outline-none focus:bg-white focus:border-purple-600 focus:ring-2 focus:ring-purple-500/20 transition"></textarea>
+                </div>
+
+                <div class="pt-3 flex items-center space-x-3">
+                    <button type="button" onclick="closeModal()" 
+                            class="w-1/3 py-2.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-800 font-medium text-sm transition">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="w-2/3 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 transition transform active:scale-95">
+                        + Save Reading Link
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Scripts -->
+    <script>
+        {% if user_role == 'Admin' %}
+        function openModal() {
+            const modal = document.getElementById('addModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closeModal() {
+            const modal = document.getElementById('addModal');
+            if (modal) modal.classList.add('hidden');
+        }
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+        const addModalEl = document.getElementById('addModal');
+        if (addModalEl) {
+            addModalEl.addEventListener('click', (e) => {
+                if (e.target.id === 'addModal') closeModal();
+            });
+        }
+        {% endif %}
+
+        // Search Filter
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase().trim();
+                const cards = document.querySelectorAll('.reading-card');
+                cards.forEach(card => {
+                    const title = card.getAttribute('data-title') || '';
+                    const author = card.getAttribute('data-author') || '';
+                    const genre = card.getAttribute('data-genre') || '';
+                    if (title.includes(term) || author.includes(term) || genre.includes(term)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
