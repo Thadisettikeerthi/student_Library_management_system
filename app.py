@@ -52,7 +52,7 @@ def login():
     if request.method == 'GET':
         if session.get('logged_in'):
             return redirect(url_for('index'))
-        return render_template('login.html')
+        return render_template('index.html')
         
     data = request.get_json(silent=True) or request.form
     role = data.get('role', '').strip().lower()
